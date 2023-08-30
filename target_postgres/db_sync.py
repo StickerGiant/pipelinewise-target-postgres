@@ -37,7 +37,9 @@ def validate_config(config):
 
 
 # pylint: disable=fixme
-def column_type(schema_property):
+def column_type(schema_property, name):
+    if 'date_' in name:
+        return 'timestamp with time zone'
     property_type = schema_property['type']
     property_format = schema_property['format'] if 'format' in schema_property else None
     col_type = 'character varying'
@@ -79,7 +81,7 @@ def safe_column_name(name):
 
 
 def column_clause(name, schema_property):
-    return '{} {}'.format(safe_column_name(name), column_type(schema_property))
+    return '{} {}'.format(safe_column_name(name), column_type(schema_property, name))
 
 
 def flatten_key(k, parent_key, sep):
@@ -553,7 +555,7 @@ class DbSync:
             ))
             for (name, properties_schema) in self.flatten_schema.items()
             if name.lower() in columns_dict and
-            columns_dict[name.lower()]['data_type'].lower() != column_type(properties_schema).lower()
+            columns_dict[name.lower()]['data_type'].lower() != column_type(properties_schema,name.lower()).lower()
         ]
 
         for (column_name, column) in columns_to_replace:
